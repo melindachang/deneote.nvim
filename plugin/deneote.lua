@@ -1,0 +1,1 @@
+require('deneote').setup()

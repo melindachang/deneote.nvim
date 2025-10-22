@@ -1,0 +1,10 @@
+*deneote.txt* Deneote
+*deneote.nvim*
+
+Author:   Melinda Chang <melindachang.hy@gmail.com>
+Version:  v0.1.0
+Homepage: <https://codeberg.org/melindachang/deneote.nvim>
+License:  GPLv3 License
+
+==============================================================================
+
