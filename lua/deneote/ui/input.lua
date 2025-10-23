@@ -1,5 +1,5 @@
-local M = {}
+local Component = require('deneote.ui.component')
 
--- local Component = require('deneote.ui.component')
+local Input = Component:extend('Input')
 
-return M
+return Input
