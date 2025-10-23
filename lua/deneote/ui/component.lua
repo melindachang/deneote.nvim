@@ -1,54 +1,65 @@
-local Class = require('deneote.middleclass')
-local Popup = require('nui.popup')
-
----@class Component : Class
----@field nui NuiPopup
-local Component = Class('Component')
-
 ---@class ComponentProps
----@field id? string
 ---@field visible? boolean
 ---@field children? Component[]
 ---@field parent? Component
----@field nui_props? nui_popup_options
-Component.static.DEFAULTS = {
-  id = nil,
+---@field nui? NuiPopup | fun(...): NuiPopup
+
+---@class Component : ComponentProps
+---@field nui? NuiPopup
+---@field mounted boolean
+---@field new fun(self: Component, props?: ComponentProps): Component
+---@field mount fun(self: Component, parent?: Component)
+---@field unmount fun(self: Component)
+local M = {}
+
+M.defaults = {
   visible = true,
   children = nil,
   parent = nil,
-  nui_props = {},
+  nui = nil,
+
+  mounted = false,
 }
 
 ---@param props ComponentProps
-function Component:init(props)
-  self.options = vim.tbl_deep_extend('force', {}, self.static.DEFAULTS, props or {})
-  self.nui = Popup(self.options.nui_props or {})
+---@return Component
+function M:new(props)
+  props = vim.tbl_deep_extend('force', M.defaults, props or {})
+
+  if type(props.nui) == 'function' then
+    props.nui = props.nui()
+  end
+
+  setmetatable(props, self)
+  self.__index = self
+
+  return props
 end
 
----@param parent? Component
-function Component:mount(parent)
-  if parent ~= nil then
-    self.options.parent = parent
+function M:mount(parent)
+  if self.nui then
+    self.nui:mount()
+    self.mounted = true
+
+    if self.children then
+      for _, child in self.children do
+        child:mount(self)
+      end
+    end
   end
 end
 
----@param new_props Component
-function Component:update(new_props)
-  self.options = vim.tbl_deep_extend('force', self.options, new_props or {})
+function M:unmount()
+  if self.mounted and self.nui then
+    if self.children then
+      for _, child in self.children do
+        child:unmount(self)
+      end
+    end
+
+    self.nui:unmount()
+    self.mounted = false
+  end
 end
 
-function Component:unmount() end
-
--- Lifecycle hooks
-function Component:on_mount() end
-
-function Component:on_unmount() end
-
----@param new_props ComponentProps
-function Component:on_update(new_props) end
-
----@param event string
----@param payload? any
-function Component:on_event(event, payload) end
-
-return Component
+return M

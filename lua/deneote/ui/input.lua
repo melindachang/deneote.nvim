@@ -1,5 +1,7 @@
 local Component = require('deneote.ui.component')
+local NuiInput = require('nui.input')
 
-local Input = Component:extend('Input')
+---@class InputComponent : Component
+local M = {}
 
-return Input
+return M

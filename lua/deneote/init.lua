@@ -12,6 +12,7 @@ end
 function M.create_note(args)
   -- Initiate prompts
   local title, tags, workspace, filetype
+
   local filestem = Utils.build_file_stem(Utils.make_timestamp(), title, tags)
 
   -- Invoke corresponding module to write to file
