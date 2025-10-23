@@ -1,16 +1,17 @@
-local Object = require('deneote.middleclass')
+local Class = require('deneote.middleclass')
 local Popup = require('nui.popup')
 
----@class Component
-local Component = Object('Component')
+---@class Component : Class
+---@field nui NuiPopup
+local Component = Class('Component')
 
----@class (exact) ComponentProps
+---@class ComponentProps
 ---@field id? string
 ---@field visible? boolean
 ---@field children? Component[]
 ---@field parent? Component
 ---@field nui_props? nui_popup_options
-Component.defaults = {
+Component.static.DEFAULTS = {
   id = nil,
   visible = true,
   children = nil,
@@ -20,24 +21,27 @@ Component.defaults = {
 
 ---@param props ComponentProps
 function Component:init(props)
-  self.options = vim.tbl_deep_extend('force', {}, self.defaults, props or {})
+  self.options = vim.tbl_deep_extend('force', {}, self.static.DEFAULTS, props or {})
   self.nui = Popup(self.options.nui_props or {})
 end
 
 ---@param parent? Component
 function Component:mount(parent)
-  self.options.parent = parent
+  if parent ~= nil then
+    self.options.parent = parent
+  end
 end
 
 ---@param new_props Component
 function Component:update(new_props)
-  self.options = vim.tbl_deep_extend('force', self.defaults, new_props or {})
+  self.options = vim.tbl_deep_extend('force', self.options, new_props or {})
 end
 
 function Component:unmount() end
 
 -- Lifecycle hooks
 function Component:on_mount() end
+
 function Component:on_unmount() end
 
 ---@param new_props ComponentProps
