@@ -1,5 +1,6 @@
 local M = {}
 
+---Maps values of an array with function
 ---@generic T
 ---@generic K
 ---@param tbl T[]
@@ -15,6 +16,7 @@ function M.map(tbl, proc)
   return proc_result
 end
 
+---Splits a string into array of strings at specified delimiter
 ---@param input string
 ---@param delimiter string
 ---@return string[]
@@ -43,12 +45,12 @@ function M.make_timestamp()
   return vim.fn.strftime('%Y%m%dT%H%M%S')
 end
 
----Makes normalized file stem according to the format `id--title-str__tag_str`
+---Builds normalized file stem according to the format `id--title-str__tag_str`
 ---@param id string
 ---@param title string
----@param tag_str string Unparsed, comma-separated string of tags
+---@param tag_str string Comma-separated string of tags
 ---@return string
-function M.make_file_stem(id, title, tag_str)
+function M.build_file_stem(id, title, tag_str)
   title = M.sanitize_file_str(title, '-'):gsub('[%s%-]+', '-')
   local tags = M.split_str(tag_str, ',')
   tags = M.map(tags, function(tag)
