@@ -6,16 +6,10 @@ local Popup = require('nui.popup')
 ---@field nui_opts? nui_popup_options
 local M = Component:new()
 
----@param props? PromptComponent
----@return PromptComponent
-function M:init_hook(props)
-  props = props or {}
-
-  if not props.nui and props.nui_opts then
-    props.nui = Popup(props.nui_opts)
+function M:init_hook()
+  if not self.nui and self.nui_opts then
+    self.nui = Popup(self.nui_opts)
   end
-
-  return props
 end
 
 return M

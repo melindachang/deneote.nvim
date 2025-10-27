@@ -8,7 +8,7 @@
 ---@field nui? NuiPopup | NuiLayout
 ---@field mounted boolean
 ---@field new fun(self: Component, props?: ComponentProps): Component
----@field init_hook? fun(self: Component, props?: Component): Component Subclasses can define additional operations to perform during instantiation
+---@field init_hook? fun(self: Component) Subclasses can define additional operations to perform during instantiation
 ---@field mount fun(self: Component, parent?: Component)
 ---@field unmount fun(self: Component)
 local M = {}
@@ -35,7 +35,7 @@ function M:new(props)
   self.__index = self
 
   if props.init_hook then
-    props:init_hook(props)
+    props:init_hook()
   end
 
   return props
