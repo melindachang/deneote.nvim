@@ -1,24 +1,56 @@
-local Component = require('deneote.ui.component')
-local Layout = require('nui.layout')
+local Prompt = require('deneote.ui.prompt')
 
----@class FormComponent : Component
----@field nui? NuiLayout
----@field nui_opts? nui_layout_options
-local M = Component:new()
+---@class FormField
+---@field key string
+---@field label string
+---@field default? string
+---@field opts? PromptComponent}[]
 
-function M:init_hook()
-  if self.children then
-    ---@type NuiLayout.Box[]
-    local fields = {}
+---@class FormHandler
+---@field fields FormField[]
+---@field results table<string, string>
+---@field new fun(self: FormHandler, fields: FormField): FormHandler
+---@field mount fun(self: FormHandler, callback: fun(state: table<string, string>))
+local M = {}
 
-    for _, child in ipairs(self.children) do
-      if child.nui then
-        table.insert(fields, Layout.Box(child.nui, { size = '100%' }))
+---@param fields FormField[]
+function M:new(fields)
+  local form = { fields = fields, results = {} }
+
+  setmetatable(form, self)
+  self.__index = self
+
+  return form
+end
+
+---@param callback fun(state: table<string, string>)
+function M:mount(callback)
+  local i = 1
+
+  local function next_prompt()
+    if i > #self.fields then
+      if callback then
+        callback(self.results)
       end
+      return
     end
 
-    self.nui = Layout(self.nui_opts or {}, Layout.Box(fields, { dir = 'col' }))
+    local field = self.fields[i]
+    i = i + 1
+
+    local prompt = Prompt:new({
+      title = field.label,
+      input_opts = vim.tbl_extend('force', field.opts or {}, { default_value = field.default }),
+      on_submit = function(state)
+        self.results[field.key] = state
+        next_prompt()
+      end,
+    })
+
+    prompt:mount()
   end
+
+  next_prompt()
 end
 
 return M

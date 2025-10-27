@@ -1,4 +1,5 @@
 local Config = require('deneote.config')
+local Cmd = require('deneote.cmd')
 local Utils = require('deneote.utils')
 
 local M = {}
@@ -6,20 +7,7 @@ local M = {}
 ---@param opts DeneoteConfig
 function M.setup(opts)
   Config.setup(opts)
-end
-
----@param args? string
-function M.create_note(args)
-  -- Initiate prompts
-  local title, tags, workspace, filetype
-
-  local filestem = Utils.build_file_stem(Utils.make_timestamp(), title, tags)
-
-  -- Invoke corresponding module to write to file
-  if filetype == 'norg' then
-    local neorg = require('deneote.modules.neorg')
-    neorg.create_file(filestem, workspace)
-  end
+  Cmd.setup()
 end
 
 return M

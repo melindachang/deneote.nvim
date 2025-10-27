@@ -1,16 +1,22 @@
----@class ComponentProps
+local _, _ = require('nui.popup'), require('nui.layout')
+
+---@alias NuiObject NuiPopup | NuiLayout
+
+---@class ComponentProps User-facing props
 ---@field visible? boolean
 ---@field children? Component[]
 ---@field parent? Component
----@field nui? NuiPopup | NuiLayout | fun(...): NuiPopup | fun(...): NuiLayout
+---@field nui? NuiObject | fun(...): NuiObject
+---@field nui_opts? nui_popup_options
 
----@class Component : ComponentProps
----@field nui? NuiPopup | NuiLayout
+---@class Component: ComponentProps Output shape
 ---@field mounted boolean
----@field new fun(self: Component, props?: ComponentProps): Component
----@field init_hook? fun(self: Component) Subclasses can define additional operations to perform during instantiation
+---@field mounts_children boolean
+---@field nui? NuiObject
+---@field init_hook? fun(self: Component, props: Component): Component Exposed for subclassses to mutate new prop table
 ---@field mount fun(self: Component, parent?: Component)
 ---@field unmount fun(self: Component)
+---@field new fun(self: Component, props?: ComponentProps): Component
 local M = {}
 
 M.defaults = {
@@ -18,8 +24,10 @@ M.defaults = {
   children = nil,
   parent = nil,
   nui = nil,
+  nui_opts = nil,
 
   mounted = false,
+  mounts_children = false,
 }
 
 ---@param props ComponentProps
@@ -34,8 +42,8 @@ function M:new(props)
   setmetatable(props, self)
   self.__index = self
 
-  if props.init_hook then
-    props:init_hook()
+  if self.init_hook then
+    props = self:init_hook(props)
   end
 
   return props
@@ -51,7 +59,7 @@ function M:mount(parent)
     self.mounted = true
   end
 
-  if self.children then
+  if self.mounts_children and self.children then
     for _, child in ipairs(self.children) do
       child:mount(self)
     end
@@ -63,7 +71,7 @@ function M:unmount()
     return
   end
 
-  if self.children then
+  if self.mounts_children and self.children then
     for _, child in ipairs(self.children) do
       child:unmount()
     end

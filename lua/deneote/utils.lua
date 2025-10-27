@@ -7,36 +7,28 @@ local M = {}
 ---@param proc fun(T): K
 ---@return K[]
 function M.map(tbl, proc)
-  local proc_result = {}
+  local res = {}
 
-  for _, val in ipairs(tbl) do
-    table.insert(proc_result, proc(val))
+  for i, v in ipairs(tbl) do
+    res[i] = proc(v)
   end
 
-  return proc_result
+  return res
 end
 
----Splits a string into array of strings at specified delimiter
----@param input string
----@param delimiter string
----@return string[]
-function M.split_str(input, delimiter)
-  local parts = {}
-
-  for part in input:gmatch('([^' .. delimiter .. ']+)') do
-    table.insert(parts, part)
-  end
-
-  return parts
+---Trims whitespace, dashes, underscores from ends of string
+---@param s string
+---@return string
+function M.trim(s)
+  local match = '[%s%-%_]+'
+  return (s:gsub('^' .. match, ''):gsub(match .. '$', ''))
 end
 
 ---Remove illegal filename characters from a string
----@param str string
----@param sub string
+---@param s string
 ---@return string
-function M.sanitize_file_str(str, sub)
-  str = str:gsub('[/\\?%*:|"<>]', sub)
-  return str
+function M.sanitize_filename(s)
+  return (s:gsub('[/\\?%*:|"<>]', ''))
 end
 
 ---Generate file identifier from current time
@@ -45,18 +37,36 @@ function M.make_timestamp()
   return vim.fn.strftime('%Y%m%dT%H%M%S')
 end
 
----Builds normalized file stem according to the format `id--title-str__tag_str`
+---Reduces sequential function applications by proc'cing on an initial value
+---@generic T
+---@param value T
+---@param ... function
+---@return T
+function M.pipe(value, ...)
+  local result = value
+  for _, fn in ipairs({ ... }) do
+    result = fn(result)
+  end
+  return result
+end
+
+---Builds normalized file stem: `id--title-str__tag_str`
 ---@param id string
 ---@param title string
 ---@param tag_str string Comma-separated string of tags
 ---@return string
 function M.build_file_stem(id, title, tag_str)
-  title = M.sanitize_file_str(title, '-'):gsub('[%s%-]+', '-')
-  local tags = M.split_str(tag_str, ',')
-  tags = M.map(tags, function(tag)
-    tag = M.sanitize_file_str(tag, ''):gsub('_+', '')
-    return tag
+  title = M.pipe(title, M.trim, M.sanitize_filename, function(s)
+    return (s:gsub('[%s%-]+', '-'))
   end)
+
+  local tags = {} ---@type string[]
+  for i, tag in vim.gsplit(tag_str, ',') do
+    tag = M.pipe(tag, M.trim, M.sanitize_filename, function(s)
+      return (s:gsub('_+', ''))
+    end)
+    tags[i] = tag
+  end
   tag_str = table.concat(tags, '_')
 
   return id .. '--' .. title .. '__' .. tag_str
