@@ -1,5 +1,7 @@
 local Config = require('deneote.config')
 local Utils = require('deneote.utils')
+local ui = require('deneote.ui')
+local component, form, prompt = ui.component, ui.form, ui.prompt
 
 local M = {}
 

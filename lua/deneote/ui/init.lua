@@ -1,6 +1,7 @@
 local M = {
   component = require('deneote.ui.component'),
-  input = require('deneote.ui.input'),
+  form = require('deneote.ui.form'),
+  prompt = require('deneote.ui.prompt'),
 }
 
 return M

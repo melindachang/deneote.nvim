@@ -1,5 +1,3 @@
-local ui = {
-  components = require('deneote.ui.component'),
-}
+local M = {}
 
-return ui
+return M
