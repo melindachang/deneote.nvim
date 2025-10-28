@@ -9,8 +9,10 @@ local Input = require('nui.input')
 ---@field title? string
 ---@field on_submit? EventHandler
 
----@class PromptComponent: Component, PromptComponentProps
+---@class PromptComponentInternals: PromptComponentProps
 ---@field nui? NuiInput
+
+---@class PromptComponent: Component, PromptComponentInternals
 local M = Component:new()
 
 M.defaults = {

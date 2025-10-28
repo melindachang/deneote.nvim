@@ -1,55 +1,50 @@
 local Config = require('deneote.config')
-local Utils = require('deneote.utils')
 local Form = require('deneote.ui.form')
+local Utils = require('deneote.utils')
 
 local M = {}
 
 M.commands = {
   create = function(_)
-    vim.notify('Creating note!')
-
-    -- Initiate prompts
+    -- Configure prompts
     local fields = {} ---@type FormField[]
 
-    if Config.options.prompts.workspace_dir then
-      fields[#fields + 1] = {
+    for _, opt in ipairs({
+      {
         key = 'workspace',
-        label = 'Enter workspace directory',
+        enabled = Config.options.prompts.workspace_dir,
         default = Config.options.default_workspace_dir,
-      }
-    end
-
-    if Config.options.prompts.file_type then
-      fields[#fields + 1] = {
+        label = 'Enter workspace directory',
+      },
+      {
         key = 'filetype',
-        label = 'Enter file type',
+        enabled = Config.options.prompts.file_type,
         default = Config.options.default_file_type,
-      }
+        label = 'Enter file type',
+      },
+      { key = 'title', enabled = true, label = 'Enter title' },
+      { key = 'tags', enabled = true, label = 'Enter tags' },
+    }) do
+      if opt.enabled then
+        fields[#fields + 1] = { key = opt.key, label = opt.label, default = opt.default or nil }
+      end
     end
-
-    fields[#fields + 1] = {
-      key = 'title',
-      label = 'Enter title',
-    }
-
-    fields[#fields + 1] = {
-      key = 'tags',
-      label = 'Enter tags',
-    }
 
     local form = Form:new(fields)
 
+    -- Form callback
     form:mount(function(state)
-      local title, tags = state.title, state.tags
-      local workspace = state.workspace and state.workspace or Config.options.default_workspace_dir
-      local filetype = state.filetype and state.filetype or Config.options.default_file_type
-
-      local filestem = Utils.build_file_stem(Utils.make_timestamp(), title, tags)
+      local payload = {
+        title = state.title,
+        tags = state.tags,
+        workspace = state.workspace and Utils.normalize_path(state.workspace)
+          or Config.options.default_workspace_dir,
+        filetype = state.filetype or Config.options.default_file_type,
+      }
 
       -- Invoke corresponding module to write to file
-      if filetype == 'norg' then
-        local neorg = require('deneote.modules.neorg')
-        neorg.create_file(filestem, workspace)
+      if payload.filetype == 'norg' then
+        require('deneote.modules.neorg').create_file(payload)
       end
     end)
   end,

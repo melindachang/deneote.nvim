@@ -1,22 +1,26 @@
+local Utils = require('deneote.utils')
+
 ---@alias DeneoteFileType 'norg' | 'org'
 
 ---@class DeneoteCoreConfig
 local M = {}
 
 ---@class DeneoteConfig
-M.defaults = {
+---@field hook? fun(manual: boolean, arguments?: string)
+---@field root string
+---@field default_workspace_dir string
+---@field default_file_type DeneoteFileType
+local defaults = {
   -- Optionally provide a function to be called on Deneote startup
-  ---@type fun(manual: boolean, arguments?: string)
   hook = nil,
 
   -- Directory where modules will be installed
-  root = vim.fs.joinpath(vim.fn.stdpath('data'), 'deneote'),
+  root = vim.fn.stdpath('data') .. '/deneote',
 
   -- New notes will be stored in this directory
-  default_workspace_dir = vim.env.HOME .. '/notes',
+  default_workspace_dir = '~/notes',
 
   -- New notes will be configured for this file type
-  ---@type DeneoteFileType
   default_file_type = 'norg',
 
   -- Set to `true` to provide values on a per-file basis
@@ -26,15 +30,18 @@ M.defaults = {
   },
 }
 
----@type DeneoteConfig
-M.options = {}
+---@class DeneoteUserConfig: DeneoteConfig
+---@field hook? fun(manual: boolean, arguments?: string)
+---@field root? string
+---@field default_workspace_dir? string
+---@field default_file_type? DeneoteFileType
 
----@param opts? DeneoteConfig
+---@param opts? DeneoteUserConfig
 function M.setup(opts)
-  M.options = vim.tbl_deep_extend('force', M.defaults, opts or {})
+  M.options = vim.tbl_deep_extend('force', defaults, opts or {}) ---@type DeneoteConfig
 
-  M.options.root = vim.fs.normalize(M.options.root)
-  M.options.default_workspace_dir = vim.fs.normalize(M.options.default_workspace_dir)
+  M.options.root = Utils.normalize_path(M.options.root)
+  M.options.default_workspace_dir = Utils.normalize_path(M.options.default_workspace_dir)
 end
 
 return M

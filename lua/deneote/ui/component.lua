@@ -1,4 +1,5 @@
-local _, _ = require('nui.popup'), require('nui.layout')
+---@module 'nui.popup'
+---@module 'nui.layout'
 
 ---@alias NuiObject NuiPopup | NuiLayout
 
@@ -9,16 +10,19 @@ local _, _ = require('nui.popup'), require('nui.layout')
 ---@field nui? NuiObject | fun(...): NuiObject
 ---@field nui_opts? nui_popup_options
 
----@class Component: ComponentProps Output shape
+---@class ComponentInternals: ComponentProps
 ---@field mounted boolean
 ---@field mounts_children boolean
 ---@field nui? NuiObject
+
+---@class Component: ComponentInternals Output shape
 ---@field init_hook? fun(self: Component, props: Component): Component Exposed for subclassses to mutate new prop table
 ---@field mount fun(self: Component, parent?: Component)
 ---@field unmount fun(self: Component)
 ---@field new fun(self: Component, props?: ComponentProps): Component
 local M = {}
 
+---@type ComponentInternals
 M.defaults = {
   visible = true,
   children = nil,

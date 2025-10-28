@@ -59,8 +59,11 @@ end
 ---@param id string
 ---@param title string
 ---@param tag_str string Comma-separated string of tags
----@return string
+---@return string, string, string[]
 function M.build_file_stem(id, title, tag_str)
+  assert(title, 'should contain title')
+  assert(tag_str, 'should contain title')
+
   title = M.pipe(title, M.trim, M.sanitize_filename, function(s)
     return s:gsub('[%s%_]+', '-'):gsub('-+', '-')
   end)
@@ -76,7 +79,14 @@ function M.build_file_stem(id, title, tag_str)
   end
   tag_str = table.concat(tags, '_')
 
-  return id .. '--' .. title .. '__' .. tag_str
+  return id .. '--' .. title .. '__' .. tag_str, title, vim.split(tag_str, '_')
+end
+
+---Resolves every path to the same object to a normal (absolute) path
+---@param path string
+---@return string
+function M.normalize_path(path)
+  return vim.fs.abspath(vim.fs.normalize(path))
 end
 
 return M
