@@ -54,9 +54,9 @@ function M.filestem_to_iso(id)
 
   local timestamp = string.format('%s-%s-%sT%s:%s:%s', year, month, day, hour, min, sec)
 
-  -- append local timezone offset
-  local tz_offset = os.date('%z') -- returns like -0500
-  timestamp = timestamp .. tz_offset
+  local tz_offset = M.get_timezone_offset()
+  local h, m = math.modf(tz_offset / 3600)
+  timestamp = timestamp .. string.format('%+.4d', h * 100 + m * 60)
 
   return timestamp
 end
@@ -74,6 +74,15 @@ function M.get_workspace_name(path)
   end
 
   return false
+end
+
+---Calculate timezone offset as Neorg does
+---@return integer
+function M.get_timezone_offset()
+  local utcdate = os.date('!*t', 0)
+  local localdate = os.date('*t', 0)
+  localdate.isdst = false -- this is the trick
+  return os.difftime(os.time(localdate), os.time(utcdate)) ---@diagnostic disable-line -- TODO: type error workaround <pysan3>
 end
 
 return M

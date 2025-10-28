@@ -78,7 +78,12 @@ function M.build_file_stem(id, title, tag_str)
   title = M.sluggify_title(title)
   local tags = M.map(vim.split(tag_str, ','), M.sluggify_tag)
 
-  tag_str = table.concat(tags, '_')
+  tag_str = table.concat(
+    vim.tbl_filter(function(t)
+      return string.find(t, '%S') ~= nil
+    end, tags),
+    '_'
+  )
 
   return id .. '--' .. title .. '__' .. tag_str, title, vim.split(tag_str, '_')
 end
