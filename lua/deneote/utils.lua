@@ -20,6 +20,7 @@ end
 ---@param s string
 ---@return string
 function M.trim(s)
+  s = s or ''
   local match = '[%s%-%_]+'
   return (s:gsub('^' .. match, ''):gsub(match .. '$', ''))
 end
@@ -28,6 +29,7 @@ end
 ---@param s string
 ---@return string
 function M.sanitize_filename(s)
+  s = s or ''
   return (s:gsub('[/\\?%*:|"<>]', ''))
 end
 
@@ -45,6 +47,9 @@ end
 function M.pipe(value, ...)
   local result = value
   for _, fn in ipairs({ ... }) do
+    if not result then
+      result = ''
+    end
     result = fn(result)
   end
   return result
@@ -57,15 +62,17 @@ end
 ---@return string
 function M.build_file_stem(id, title, tag_str)
   title = M.pipe(title, M.trim, M.sanitize_filename, function(s)
-    return (s:gsub('[%s%-]+', '-'))
+    return s:gsub('[%s%_]+', '-'):gsub('-+', '-')
   end)
 
   local tags = {} ---@type string[]
-  for i, tag in vim.gsplit(tag_str, ',') do
+  for tag in vim.gsplit(tag_str, ',') do
     tag = M.pipe(tag, M.trim, M.sanitize_filename, function(s)
-      return (s:gsub('_+', ''))
+      return s:gsub('[%s_]+', '-'):gsub('-+', '-')
     end)
-    tags[i] = tag
+    if tag then
+      tags[#tags + 1] = tag
+    end
   end
   tag_str = table.concat(tags, '_')
 
