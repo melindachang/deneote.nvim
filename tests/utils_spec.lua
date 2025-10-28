@@ -54,13 +54,15 @@ describe('Utils.slug_hyphenate()', function()
   end)
 end)
 
-describe('Utils.sluggify()', function()
-  it('lowercases string', function()
-    eq('foo', Utils.sluggify('FOO'))
-  end)
-
+describe('Utils.sluggify_title()', function()
   it('downcases, hyphenates, de-punctuates, and removes spaces from string', function()
-    eq('this-is-a-test', Utils.sluggify(' ___ !~!!$%^ This iS a tEsT ++ ?? '))
+    eq('this-is-a-test', Utils.sluggify_title(' ___ !~!!$%^ This iS a tEsT ++ ?? '))
+  end)
+end)
+
+describe('Utils.sluggify_tag()', function()
+  it('downcases, de-punctuates, and removes delimiters from string', function()
+    eq('thisisatest', Utils.sluggify_tag(' ___ !~!!$%^ This iS a tEsT ++ ?? '))
   end)
 end)
 

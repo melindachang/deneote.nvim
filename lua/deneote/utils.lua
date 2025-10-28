@@ -53,11 +53,19 @@ end
 ---Downcases, hyphenates, de-punctuates, and removes spaces from string.
 ---@param s string
 ---@return string
-function M.sluggify(s)
+function M.sluggify_title(s)
   s = s or ''
   s = s:lower()
   s = M.slug_sanitize(s)
   s = M.slug_hyphenate(s)
+  return s
+end
+
+---Downcases, de-punctuates, and removes delimiters from string.
+function M.sluggify_tag(s)
+  s = s or ''
+  s = M.sluggify_title(s)
+  s = s:gsub('%-', '')
   return s
 end
 
@@ -67,18 +75,8 @@ end
 ---@param tag_str string Comma-separated string of tags
 ---@return string, string, string[]
 function M.build_file_stem(id, title, tag_str)
-  assert(title, 'should contain title')
-  assert(tag_str, 'should contain title')
-
-  title = M.sluggify(title)
-
-  local tags = {} ---@type string[]
-  for tag in vim.gsplit(tag_str, ',') do
-    tag = M.sluggify(tag):gsub('%-', '')
-    if #tag ~= 0 then
-      tags[#tags + 1] = tag
-    end
-  end
+  title = M.sluggify_title(title)
+  local tags = M.map(vim.split(tag_str, ','), M.sluggify_tag)
 
   tag_str = table.concat(tags, '_')
 
