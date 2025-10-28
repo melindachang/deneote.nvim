@@ -14,71 +14,53 @@ describe('Utils.map()', function()
   end)
 end)
 
-describe('Utils.trim()', function()
-  it('trims whitespace, dashes, underscores', function()
-    eq('foo', Utils.trim('-_--   foo _ -- __ '))
-  end)
-end)
-
-describe('Utils.sanitize_filename()', function()
-  it('removes illegal characters', function()
-    eq('file', Utils.sanitize_filename('|f/i*l:e?<>'))
-  end)
-end)
-
-describe('Utils.pipe()', function()
-  it('applies a single function', function()
-    local res = Utils.pipe(5, function(x)
-      return x * 2
-    end)
-    eq(10, res)
-  end)
-
-  it('chains multiple functions in order', function()
-    local res = Utils.pipe(
-      'foo',
-      function(s)
-        return s .. 'bar'
-      end,
-      string.upper,
-      function(s)
-        return s .. '!'
-      end
-    )
-    eq('FOOBAR!', res)
-  end)
-
-  it('handles no functions gracefully', function()
-    eq('unchanged', Utils.pipe('unchanged'))
-  end)
-
-  it('can handle number transformations', function()
-    local res = Utils.pipe(2, function(n)
-      return n + 3
-    end, function(n)
-      return n * 4
-    end, function(n)
-      return n - 1
-    end)
-    eq(19, res) -- ((2 + 3) * 4) - 1 = 19
-  end)
-
-  it('works with functions that return tables', function()
-    local res = Utils.pipe(1, function(n)
-      return { n, n + 1 }
-    end, function(tbl)
-      return vim.tbl_map(function(x)
-        return x * 10
-      end, tbl)
-    end)
-    eq({ 10, 20 }, res)
-  end)
-end)
-
 describe('Utils.make_timestamp()', function()
   it('returns string in expected format', function()
     local ts = Utils.make_timestamp()
     match('^%d%d%d%d%d%d%d%dT%d%d%d%d%d%d$', ts)
+  end)
+end)
+
+describe('Utils.slug_sanitize()', function()
+  it('removes illegal filename characters', function()
+    eq('file', Utils.slug_sanitize('|f/i*l:e?<>'))
+  end)
+
+  it('replaces non-ASCII characters with spaces', function()
+    eq(
+      'There are no-ASCII     characters     here     ',
+      Utils.slug_sanitize('There are no-ASCII ： characters ｜ here 😀')
+    )
+  end)
+
+  it('removes symbols from string', function()
+    eq('This-is-test', Utils.slug_sanitize('This-is-!@#test'))
+  end)
+end)
+
+describe('Utils.slug_hyphenate()', function()
+  it('hyphenates string', function()
+    eq('This-is-a-test', Utils.slug_hyphenate('__  This is   a    test  __  '))
+
+    eq('!~!!$%^-This-iS-a-tEsT-++-??', Utils.slug_hyphenate(' ___ !~!!$%^ This iS a tEsT ++ ?? '))
+  end)
+  it('replaces multiple hyphens with single hyphen', function()
+    eq('foo-bar', Utils.slug_hyphenate('foo---bar'))
+    eq('foo-bar', Utils.slug_hyphenate('foo__-bar'))
+  end)
+  it('trims hyphens from ends of string', function()
+    eq('foo', Utils.slug_hyphenate('--foo-'))
+    eq('foo', Utils.slug_hyphenate('- __-foo-__  '))
+  end)
+end)
+
+describe('Utils.sluggify()', function()
+  it('lowercases string', function()
+    eq('foo', Utils.sluggify('FOO'))
+  end)
+
+  it('downcases, hyphenates, de-punctuates, and removes spaces from string', function()
+    eq('this-is-a-test', Utils.sluggify(' ___ !~!!$%^ This iS a tEsT ++ ?? '))
   end)
 end)
 
@@ -149,7 +131,7 @@ describe('Utils.build_file_stem()', function()
     assert(tag_part, 'should extract tag part')
 
     local expected_title = 'foo-bar'
-    local expected_tags = 'bar-1_bar2'
+    local expected_tags = 'bar1_bar2'
 
     eq(expected_title, title_part)
     eq(expected_tags, tag_part)
@@ -173,7 +155,7 @@ describe('Utils.build_file_stem()', function()
     assert(tag_part, 'should extract tag part')
 
     local expected_title = 'foo-bar'
-    local expected_tags = 'bar-1_bar-2'
+    local expected_tags = 'bar1_bar2'
 
     eq(expected_title, title_part)
     eq(expected_tags, tag_part)

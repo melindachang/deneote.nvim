@@ -40,6 +40,8 @@ function M.create_file(payload)
     else
       vim.notify('File already exists!')
     end
+  else
+    -- TODO: handle nonexistent workspace
   end
 end
 

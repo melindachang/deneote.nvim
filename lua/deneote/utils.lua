@@ -16,21 +16,32 @@ function M.map(tbl, proc)
   return res
 end
 
----Trims whitespace, dashes, underscores from ends of string
+---Remove illegal slug characters from a string
 ---@param s string
 ---@return string
-function M.trim(s)
+function M.slug_sanitize(s)
   s = s or ''
-  local match = '[%s%-%_]+'
-  return (s:gsub('^' .. match, ''):gsub(match .. '$', ''))
+  -- Remove illegal filename characters
+  s = s:gsub('[/\\?%%*:|"<>]', '')
+  -- Replace non-ASCII characters with spaces
+  s = s:gsub('[^%z\1-\127]', ' ')
+  -- Remove punctuation, symbols
+  s = s:gsub('[%[%]{}!@#%$%%%^&%*%(%)+\'",%.|;:~`‘’“”/=]+', '')
+  return s
 end
 
----Remove illegal filename characters from a string
+---Replace whitespace, underscores, multiple hyphens with single hyphens; trim.
 ---@param s string
 ---@return string
-function M.sanitize_filename(s)
+function M.slug_hyphenate(s)
   s = s or ''
-  return (s:gsub('[/\\?%*:|"<>]', ''))
+  -- Replace whitespace and underscores with hyphens
+  s = s:gsub('[%s%_]', '-')
+  -- Replace multiple hyphens with single
+  s = s:gsub('%-+', '-')
+  -- Remove leading/trailing hyphens
+  s = s:gsub('^%-+', ''):gsub('%-+$', '')
+  return s
 end
 
 ---Generate file identifier from current time
@@ -39,20 +50,15 @@ function M.make_timestamp()
   return vim.fn.strftime('%Y%m%dT%H%M%S')
 end
 
----Reduces sequential function applications by proc'cing on an initial value
----@generic T
----@param value T
----@param ... function
----@return T
-function M.pipe(value, ...)
-  local result = value
-  for _, fn in ipairs({ ... }) do
-    if not result then
-      result = ''
-    end
-    result = fn(result)
-  end
-  return result
+---Downcases, hyphenates, de-punctuates, and removes spaces from string.
+---@param s string
+---@return string
+function M.sluggify(s)
+  s = s or ''
+  s = s:lower()
+  s = M.slug_sanitize(s)
+  s = M.slug_hyphenate(s)
+  return s
 end
 
 ---Builds normalized file stem: `id--title-str__tag_str`
@@ -64,19 +70,16 @@ function M.build_file_stem(id, title, tag_str)
   assert(title, 'should contain title')
   assert(tag_str, 'should contain title')
 
-  title = M.pipe(title, M.trim, M.sanitize_filename, function(s)
-    return s:gsub('[%s%_]+', '-'):gsub('-+', '-')
-  end)
+  title = M.sluggify(title)
 
   local tags = {} ---@type string[]
   for tag in vim.gsplit(tag_str, ',') do
-    tag = M.pipe(tag, M.trim, M.sanitize_filename, function(s)
-      return s:gsub('[%s_]+', '-'):gsub('-+', '-')
-    end)
-    if tag then
+    tag = M.sluggify(tag):gsub('%-', '')
+    if #tag ~= 0 then
       tags[#tags + 1] = tag
     end
   end
+
   tag_str = table.concat(tags, '_')
 
   return id .. '--' .. title .. '__' .. tag_str, title, vim.split(tag_str, '_')
