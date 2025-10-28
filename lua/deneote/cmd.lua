@@ -1,9 +1,11 @@
-local Api = require('deneote.api')
-
 local M = {}
 
+M.commands = {
+  create = require('deneote.api').notes.create,
+}
+
 function M.cmd(cmd, opts)
-  local command = Api.commands[cmd]
+  local command = M.commands[cmd]
   if command then
     command(opts)
   else
@@ -38,7 +40,7 @@ function M.setup()
       local prefix = M.parse(line)
       return vim.tbl_filter(function(key)
         return key:find(prefix, 1, true) == 1
-      end, vim.tbl_keys(Api.commands))
+      end, vim.tbl_keys(M.commands))
     end,
   })
 end
