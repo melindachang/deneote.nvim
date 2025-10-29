@@ -3,85 +3,92 @@
 
 ---@alias NuiObject NuiPopup | NuiLayout
 
----@class ComponentProps User-facing props
----@field visible? boolean
----@field children? Component[]
----@field parent? Component
----@field nui? NuiObject | fun(...): NuiObject
----@field nui_opts? nui_popup_options
-
----@class ComponentInternals: ComponentProps
+---@class Component
+---@field state table
 ---@field mounted boolean
----@field mounts_children boolean
+---@field parent? Component
+---@field children Component[]
 ---@field nui? NuiObject
-
----@class Component: ComponentInternals Output shape
----@field init_hook? fun(self: Component, props: Component): Component Exposed for subclassses to mutate new prop table
----@field mount fun(self: Component, parent?: Component)
----@field unmount fun(self: Component)
----@field new fun(self: Component, props?: ComponentProps): Component
+---@field events table<string, fun(...)[]>
+---@field init? fun(self: Component, props: Component): Component
 local M = {}
 
----@type ComponentInternals
 M.defaults = {
-  visible = true,
-  children = nil,
-  parent = nil,
-  nui = nil,
-  nui_opts = nil,
-
+  state = {},
   mounted = false,
-  mounts_children = false,
+  parent = nil,
+  children = {},
+  nui = nil,
+  events = {},
 }
 
----@param props ComponentProps
 ---@return Component
 function M:new(props)
-  props = vim.tbl_deep_extend('force', {}, self.defaults, props or {})
+  local instance = vim.tbl_deep_extend('force', {}, self.defaults, props or {})
 
-  if type(props.nui) == 'function' then
-    props.nui = props.nui()
+  if type(instance.nui) == 'function' then
+    instance.nui = instance.nui()
   end
 
-  setmetatable(props, self)
+  setmetatable(instance, self)
   self.__index = self
 
-  if self.init_hook then
-    props = self:init_hook(props)
+  if self.init then
+    instance = self:init(instance)
   end
 
-  return props
+  return instance
 end
 
-function M:mount(parent)
-  if parent then
-    self.parent = parent
+---@param partial table
+function M:set_state(partial)
+  self.state = vim.tbl_extend('force', self.state or {}, partial)
+end
+
+---@param event string
+---@param callback fun(...)
+function M:on(event, callback)
+  self.events[event] = self.events[event] or {}
+  table.insert(self.events[event], callback)
+end
+
+---@param event string
+---@param ... any
+function M:emit(event, ...)
+  local lst = self.events[event]
+  if lst then
+    for _, cb in ipairs(lst) do
+      cb(...)
+    end
   end
+end
+
+---@param child Component
+function M:add_child(child)
+  self.children = self.children or {}
+  table.insert(self.children, child)
+end
+
+---@param parent? Component
+function M:mount(parent)
+  self.parent = parent
 
   if self.nui and not self.mounted then
     self.nui:mount()
     self.mounted = true
   end
 
-  if self.mounts_children and self.children then
-    for _, child in ipairs(self.children) do
-      child:mount(self)
-    end
+  for _, child in ipairs(self.children) do
+    child:mount(self)
   end
 end
 
 function M:unmount()
-  if not self.mounted then
-    return
+  for _, child in ipairs(self.children) do
+    child:unmount()
   end
 
-  if self.mounts_children and self.children then
-    for _, child in ipairs(self.children) do
-      child:unmount()
-    end
-  end
-
-  if self.nui then
+  if self.nui and self.mounted then
     self.nui:unmount()
   end
 

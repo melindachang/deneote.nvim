@@ -1,31 +1,23 @@
 local Component = require('deneote.ui.component')
-local Input = require('nui.input')
+local input = require('nui.input')
 
----@alias EventHandler fun(state: string)
+---@class PromptComponentProps
+---@field popup_opts nui_popup_options
+---@field input_opts nui_input_options
+---@field title string
 
----@class PromptComponentProps: ComponentProps
----@field nui_opts? nui_popup_options
----@field input_opts? nui_input_options
----@field title? string
----@field on_submit? EventHandler
+---@class PromptComponent: Component, PromptComponentProps
+---@field nui NuiInput
+---@field state { text: string }
+local Prompt = Component:new()
 
----@class PromptComponentInternals: PromptComponentProps
----@field nui? NuiInput
-
----@class PromptComponent: Component, PromptComponentInternals
-local M = Component:new()
-
-M.defaults = {
-  nui_opts = {
+---@type PromptComponent
+Prompt.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
+  popup_opts = {
     zindex = 100,
     position = '50%',
-    relative = 'win',
-    size = {
-      width = 30,
-      height = 5,
-    },
-    enter = false,
-    focusable = true,
+    relative = 'editor',
+    size = { width = 30, height = 5 },
     border = {
       padding = { 0, 1, 0, 1 },
       style = 'rounded',
@@ -38,24 +30,37 @@ M.defaults = {
       winhighlight = 'FloatTitle:Title,FloatBorder:Normal,NormalFloat:Normal',
     },
   },
+  input_opts = {},
   title = '',
-  on_submit = nil,
-}
+  state = {
+    text = '',
+  },
+})
 
----@param props PromptComponent
+---@param instance PromptComponent
 ---@return PromptComponent
-function M:init_hook(props)
-  props.nui = Input(
-    vim.tbl_deep_extend(
-      'force',
-      props.nui_opts or {},
-      { border = { text = { top = ' ' .. props.title .. ' ' } } }
-    ),
-
-    vim.tbl_deep_extend('force', props.input_opts or {}, { on_submit = props.on_submit })
+function Prompt:init(instance)
+  instance.nui = input(
+    instance.popup_opts,
+    vim.tbl_extend('force', instance.input_opts, {
+      default_value = instance.state.text,
+      on_change = function(value)
+        instance:set_state({ text = value })
+        instance:emit('change', value)
+      end,
+      on_submit = function(value)
+        instance:unmount()
+        instance:set_state({ text = value })
+        instance:emit('submit', value)
+      end,
+    })
   )
 
-  return props
+  if instance.title ~= '' then
+    instance.nui.border:set_text('top', ' ' .. instance.title .. ' ')
+  end
+
+  return instance
 end
 
-return M
+return Prompt

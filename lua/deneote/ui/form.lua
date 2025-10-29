@@ -28,6 +28,7 @@ function M:mount(callback)
   local i = 1
 
   local function next_prompt()
+    vim.notify(tostring(i))
     if i > #self.fields then
       if callback then
         callback(self.results)
@@ -36,16 +37,21 @@ function M:mount(callback)
     end
 
     local field = self.fields[i]
-    i = i + 1
 
     local prompt = Prompt:new({
       title = field.label,
-      input_opts = vim.tbl_extend('force', field.opts or {}, { default_value = field.default }),
-      on_submit = function(state)
-        self.results[field.key] = state
-        next_prompt()
-      end,
+      input_opts = vim.tbl_extend(
+        'force',
+        field.opts or {},
+        { default_value = field.default }
+      ),
     })
+
+    prompt:on('submit', function(value)
+      self.results[field.key] = value
+      i = i + 1
+      vim.schedule(next_prompt)
+    end)
 
     prompt:mount()
   end
