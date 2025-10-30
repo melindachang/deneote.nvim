@@ -20,6 +20,7 @@ public consumption etc. Building for Neorg support first.
     formats
   - [ ] Allow customization of file name template (e.g., removing `T` in the
     ID)
+  - [ ] Allow custom definitions for prompts via component system
 - [ ] Add backlinking features
 
 ## Overview
@@ -53,6 +54,6 @@ the following workflows:
   [oil.nvim](https://github.com/stevearc/oil.nvim)) are familiar and plenty
   robust.
 - **Standard-agnostic.** The basic functionality of Deneote is compatible with
-  any file type, so it can be easily configured to fit your preferred standard.
-  (Adding fully-featured support is largely a matter of generating
-  format-specific metadata.)
+  any file type, so it can be easily configured to fit your preferred standard,
+  or switch between them based on user input. (Adding fully-featured support is
+  largely a matter of generating format-specific metadata.)
