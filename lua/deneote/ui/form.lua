@@ -28,7 +28,6 @@ function M:mount(callback)
   local i = 1
 
   local function next_prompt()
-    vim.notify(tostring(i))
     if i > #self.fields then
       if callback then
         callback(self.results)

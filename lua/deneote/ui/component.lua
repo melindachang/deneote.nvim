@@ -1,34 +1,34 @@
----@module 'nui.popup'
----@module 'nui.layout'
+local Signal = require('deneote.ui.signal')
+local Utils = require('deneote.utils')
+local layout = require('nui.layout')
+local box = layout.Box
 
----@alias NuiObject NuiPopup | NuiLayout
+---@class ComponentProps
+---@field initial_state? table
+---@field box_options? nui_layout_box_options
 
----@class Component
----@field state table
----@field mounted boolean
----@field parent? Component
----@field children Component[]
----@field nui? NuiObject
----@field events table<string, fun(...)[]>
----@field init? fun(self: Component, props: Component): Component
+---@class Component: ComponentProps
+---@field children? Component[]
+---@field nui? NuiPopup
+---@field _state? Signal<table>
+---@field init? fun(self: Component, instance: Component): Component
 local M = {}
 
+---@type Component
 M.defaults = {
-  state = {},
-  mounted = false,
-  parent = nil,
-  children = {},
-  nui = nil,
-  events = {},
+  box_options = {
+    size = { height = '100%', width = '100%' },
+  },
 }
 
----@return Component
+---@generic T: Component
+---@param props? ComponentProps
+---@return T
 function M:new(props)
-  local instance = vim.tbl_deep_extend('force', {}, self.defaults, props or {})
+  props = props or {}
 
-  if type(instance.nui) == 'function' then
-    instance.nui = instance.nui()
-  end
+  local instance = vim.tbl_deep_extend('force', {}, self.defaults, props)
+  instance._state = Signal:new(instance.initial_state or {})
 
   setmetatable(instance, self)
   self.__index = self
@@ -40,59 +40,37 @@ function M:new(props)
   return instance
 end
 
----@param partial table
-function M:set_state(partial)
-  self.state = vim.tbl_extend('force', self.state or {}, partial)
-end
-
----@param event string
----@param callback fun(...)
-function M:on(event, callback)
-  self.events[event] = self.events[event] or {}
-  table.insert(self.events[event], callback)
-end
-
----@param event string
----@param ... any
-function M:emit(event, ...)
-  local lst = self.events[event]
-  if lst then
-    for _, cb in ipairs(lst) do
-      cb(...)
-    end
-  end
-end
-
 ---@param child Component
 function M:add_child(child)
   self.children = self.children or {}
   table.insert(self.children, child)
 end
 
----@param parent? Component
-function M:mount(parent)
-  self.parent = parent
+---@return NuiLayout.Box
+function M:render()
+  if self.children then
+    local components = Utils.map(self.children, function(child)
+      return child:render()
+    end)
 
-  if self.nui and not self.mounted then
-    self.nui:mount()
-    self.mounted = true
+    return box(components, self.box_options)
   end
 
-  for _, child in ipairs(self.children) do
-    child:mount(self)
-  end
+  assert(self.nui, 'Composite component must have children')
+
+  return box(self.nui, self.box_options)
 end
 
-function M:unmount()
-  for _, child in ipairs(self.children) do
-    child:unmount()
-  end
+---@param modify_fn fun(...): nil
+function M:modify_buffer_content(modify_fn)
+  vim.schedule(function()
+    modify_fn()
+  end)
+end
 
-  if self.nui and self.mounted then
-    self.nui:unmount()
-  end
-
-  self.mounted = false
+---@param opts SignalSubscriber
+function M:watch(opts)
+  self._state:subscribe(opts)
 end
 
 return M

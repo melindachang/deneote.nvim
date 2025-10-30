@@ -2,18 +2,18 @@ local Component = require('deneote.ui.component')
 local input = require('nui.input')
 
 ---@class PromptComponentProps
----@field popup_opts nui_popup_options
----@field input_opts nui_input_options
----@field title string
+---@field popup_options? nui_popup_options
+---@field input_options? nui_input_options
+---@field title? string
 
 ---@class PromptComponent: Component, PromptComponentProps
 ---@field nui NuiInput
----@field state { text: string }
-local Prompt = Component:new()
+---@field _state Signal<{ text: string }>
+local M = Component:new()
 
 ---@type PromptComponent
-Prompt.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
-  popup_opts = {
+M.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
+  popup_options = {
     zindex = 100,
     position = '50%',
     relative = 'editor',
@@ -30,28 +30,25 @@ Prompt.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
       winhighlight = 'FloatTitle:Title,FloatBorder:Normal,NormalFloat:Normal',
     },
   },
-  input_opts = {},
+  input_options = {},
   title = '',
-  state = {
+  initial_state = {
     text = '',
   },
 })
 
 ---@param instance PromptComponent
 ---@return PromptComponent
-function Prompt:init(instance)
+function M:init(instance)
   instance.nui = input(
-    instance.popup_opts,
-    vim.tbl_extend('force', instance.input_opts, {
-      default_value = instance.state.text,
+    instance.popup_options,
+    vim.tbl_extend('force', instance.input_options, {
+      default_value = instance._state:get_value().text,
       on_change = function(value)
-        instance:set_state({ text = value })
-        instance:emit('change', value)
+        instance._state:next({ text = value })
       end,
       on_submit = function(value)
-        instance:unmount()
-        instance:set_state({ text = value })
-        instance:emit('submit', value)
+        instance._state:complete({ text = value })
       end,
     })
   )
@@ -63,4 +60,4 @@ function Prompt:init(instance)
   return instance
 end
 
-return Prompt
+return M

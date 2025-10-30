@@ -2,20 +2,20 @@ local Component = require('deneote.ui.component')
 local Utils = require('deneote.utils')
 local menu = require('nui.menu')
 
----@class MenuComponentProps
----@field popup_opts nui_popup_options
----@field menu_opts nui_menu_options
----@field title string
----@field items string[]
+---@class MenuComponentProps: ComponentProps
+---@field popup_options? nui_popup_options
+---@field menu_options? nui_menu_options
+---@field title? string
+---@field items? string[]
 
 ---@class MenuComponent: Component, MenuComponentProps
 ---@field nui NuiMenu
----@field state { selected: '', filtered: string[] }
-local Menu = Component:new()
+---@field _state Signal<{ selected: '', filtered: string[] }>
+local M = Component:new()
 
 ---@type MenuComponent
-Menu.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
-  popup_opts = {
+M.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
+  popup_options = {
     zindex = 100,
     position = '50%',
     relative = 'editor',
@@ -35,10 +35,10 @@ Menu.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
       winhighlight = 'FloatTitle:Title,FloatBorder:Normal,NormalFloat:Normal',
     },
   },
-  menu_opts = {},
+  menu_options = {},
   title = '',
   items = {},
-  state = {
+  initial_state = {
     selected = '',
     filtered = {},
   },
@@ -46,24 +46,23 @@ Menu.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
 
 ---@param instance MenuComponent
 ---@return MenuComponent
-function Menu:init(instance)
+function M:init(instance)
   instance.nui = menu(
-    instance.popup_opts,
-    vim.tbl_extend('force', instance.menu_opts, {
+    instance.popup_options,
+    vim.tbl_extend('force', instance.menu_options, {
       lines = Utils.map(instance.items, function(item)
         return menu.item(item)
       end),
-      on_change = function(value)
-        instance:set_state({ selected = value })
-        instance:emit('change', value)
-      end,
       on_submit = function(value)
-        instance:unmount()
-        instance:set_state({ selected = value })
-        instance:emit('submit', value)
+        instance._state:complete({ selected = value })
       end,
     })
   )
+
+  instance._state:next({
+    selected = instance.items[1],
+    filtered = instance.items,
+  })
 
   if instance.title ~= '' then
     instance.nui.border:set_text('top', ' ' .. instance.title .. ' ')
@@ -71,3 +70,5 @@ function Menu:init(instance)
 
   return instance
 end
+
+return M
