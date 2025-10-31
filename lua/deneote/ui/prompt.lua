@@ -8,7 +8,7 @@ local input = require('nui.input')
 
 ---@class PromptComponent: Component, PromptComponentProps
 ---@field nui NuiInput
----@field _state Signal<{ text: string }>
+---@field state Signal<{ text: string }>
 local M = Component:new()
 
 ---@type PromptComponent
@@ -43,12 +43,12 @@ function M:init(instance)
   instance.nui = input(
     instance.popup_options,
     vim.tbl_extend('force', instance.input_options, {
-      default_value = instance._state:get_value().text,
+      default_value = instance.state:get_value().text,
       on_change = function(value)
-        instance._state:next({ text = value })
+        instance.state:next({ text = value })
       end,
       on_submit = function(value)
-        instance._state:complete({ text = value })
+        instance.state:complete({ text = value })
       end,
     })
   )
@@ -58,6 +58,24 @@ function M:init(instance)
   end
 
   return instance
+end
+
+function M:on_update()
+  self:modify_buffer_content(function()
+    local buf = self.nui.bufnr or -1
+    if not vim.api.nvim_buf_is_valid(buf) then
+      return
+    end
+
+    local state = self.state:get_value().text
+
+    local current =
+      table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), '\n')
+
+    if current ~= state then
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, { state })
+    end
+  end)
 end
 
 return M

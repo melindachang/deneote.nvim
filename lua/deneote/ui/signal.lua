@@ -8,12 +8,12 @@
 local M = {}
 
 ---@generic T: table
----@param initial_value T
+---@param initial_value? T
 ---@return Signal<T>
 function M:new(initial_value)
   self.__index = self
   return setmetatable(
-    { _value = initial_value, _subscribers = {}, _completed = false },
+    { _value = initial_value or {}, _subscribers = {}, _completed = false },
     self
   )
 end

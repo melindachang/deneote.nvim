@@ -10,7 +10,7 @@ local menu = require('nui.menu')
 
 ---@class MenuComponent: Component, MenuComponentProps
 ---@field nui NuiMenu
----@field _state Signal<{ selected: '', filtered: string[] }>
+---@field state Signal<{ selected: '', filtered: string[] }>
 local M = Component:new()
 
 ---@type MenuComponent
@@ -54,12 +54,12 @@ function M:init(instance)
         return menu.item(item)
       end),
       on_submit = function(value)
-        instance._state:complete({ selected = value })
+        instance.state:complete({ selected = value })
       end,
     })
   )
 
-  instance._state:next({
+  instance.state:next({
     selected = instance.items[1],
     filtered = instance.items,
   })
