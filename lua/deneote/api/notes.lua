@@ -22,10 +22,17 @@ function M.create(_) -- TODO: support args
       })
     end)
     :add_step('keywords', function()
-      return WildMenu:new({
-        title = '󰓹 Keywords',
-        items = { 'one', 'two', 'three' },
-      })
+      if #Config.options.known_keywords > 0 then
+        return WildMenu:new({
+          title = '󰓹 Keywords',
+          items = Config.options.known_keywords,
+        })
+      else
+        return Prompt:new({
+          title = '󰓹 Keywords',
+          box_options = { grow = 0 },
+        })
+      end
     end)
 
   if Config.options.prompts.workspace_dir then

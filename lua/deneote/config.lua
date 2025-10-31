@@ -11,6 +11,7 @@ local M = {}
 ---@field root string
 ---@field default_workspace_dir string
 ---@field default_file_type DeneoteFileType
+---@field known_keywords string[]
 local defaults = {
   -- Optionally provide a function to be called on Deneote startup
   hook = nil,
@@ -23,6 +24,9 @@ local defaults = {
 
   -- New notes will be configured for this file type
   default_file_type = 'norg',
+
+  -- Provide list of strings to suggest in the keyword prompt
+  known_keywords = {},
 
   -- Set to `true` to provide values on a per-file basis
   prompts = {
