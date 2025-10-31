@@ -6,7 +6,7 @@ public consumption etc. Building for Neorg support first.
 
 ## Overview
 
-The Deneote system organizes itself about a central file naming convention.
+The Deneote system organizes itself about a central file name convention.
 Here's an example of a typical file outputted by Deneote:
 
 ``` 20251028T123846--my-first-note__foo_bar.norg ```
@@ -34,22 +34,23 @@ the following workflows:
   [ripgrep](https://github.com/BurntSushi/ripgrep) (or Neovim plugins like
   [oil.nvim](https://github.com/stevearc/oil.nvim)) are familiar and plenty
   robust.
-- **Standard-agnostic.** The basic functionality of Deneote is compatible with
-  any file type, so it can be easily configured to fit your preferred standard,
-  or switch between them based on user input. (Adding fully-featured support is
-  largely a matter of generating format-specific metadata.)
+- **Standard agnosticism.** Deneote's most elementary naming tools are
+  compatible with any file type, so it can be easily configured to fit your
+  preferred plain text standard, or switch between them based on user input.
+  (Adding fully-featured support is a matter of interfacing with
+  format-specific metadata.)
 
 ## Roadmap
 
 - [x] Redesign component system and clean up API
 - [x] Add suggestions for persistent keywords
-- [ ] Add (bulk) renaming of existing files
+- [ ] Add (bulk) renaming of existing files from metadata
 - [ ] Add search within files, equiv. `denote-dired`
-- [ ] Add support for other plain text standards
+- [ ] Add support for other file types
     - [ ] org
     - [ ] Markdown + YAML
     - [ ] Markdown + TOML
-    - [ ] Add fallback behavior for "unsupported" filetypes
+    - [ ] Add fallback behavior for "unsupported" file types
 - [ ] Add much more granular configuration of plugin behaviors
   - [ ] Allow users to pass in their own hooks to handle unsupported file
     formats
@@ -57,4 +58,3 @@ the following workflows:
     ID)
   - [ ] Allow custom definitions for prompts via component system
 - [ ] Add backlinking features
-
