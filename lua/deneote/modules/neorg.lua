@@ -20,28 +20,27 @@ function M.create_file(payload)
   local ws = M.get_workspace_name(payload.workspace)
 
   if ws then
-    local path = vim.fs.joinpath(payload.workspace, stem .. '.norg')
-    local buf = vim.fn.bufadd(path)
-    vim.fn.bufload(buf)
-    vim.bo[buf].filetype = 'norg'
+    local buf = fs.create_note_buffer(payload.workspace, stem, 'norg')
 
-    local present = NeorgMetagen.is_metadata_present(buf)
+    vim.schedule(function()
+      local present = NeorgMetagen.is_metadata_present(buf)
 
-    if not present then
-      local lines = NeorgMetagen.construct_metadata(buf, {
-        title = title,
-        categories = function()
-          return string.format('[\n  %s\n]', table.concat(keywords, '\n  '))
-        end,
-        created = neorg_ts,
-        updated = neorg_ts,
-      })
+      if not present then
+        local lines = NeorgMetagen.construct_metadata(buf, {
+          title = title,
+          categories = function()
+            return string.format('[\n  %s\n]', table.concat(keywords, '\n  '))
+          end,
+          created = neorg_ts,
+          updated = neorg_ts,
+        })
 
-      vim.api.nvim_buf_set_lines(buf, 0, 0, false, lines)
-      vim.api.nvim_set_current_buf(buf)
-    else
-      vim.notify('File already exists!')
-    end
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+        vim.api.nvim_set_current_buf(buf)
+      else
+        vim.notify('File already exists!')
+      end
+    end)
   else
     -- TODO: handle nonexistent workspace
   end

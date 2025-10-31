@@ -9,7 +9,7 @@ local fs = require('deneote.utils.fs')
 
 local M = {}
 
----Create note using flow-controlled prompts
+---Create plain text note with user prompts
 function M.create(_) -- TODO: support args
   local renderer = Renderer:new()
   local flow = Flow:new(renderer)
@@ -59,6 +59,16 @@ function M.create(_) -- TODO: support args
     -- Invoke corresponding module to write to file
     if payload.filetype == 'norg' then
       require('deneote.modules.neorg').create_file(payload)
+    else
+      -- default: matches no modules
+      local ts = fs.make_timestamp()
+      local stem = fs.build_file_stem(ts, payload.title, payload.keywords)
+      local buf =
+        fs.create_note_buffer(payload.workspace, stem, payload.filetype)
+
+      vim.schedule(function()
+        vim.api.nvim_set_current_buf(buf)
+      end)
     end
   end
 

@@ -50,7 +50,7 @@ the following workflows:
     - [ ] org
     - [ ] Markdown + YAML
     - [ ] Markdown + TOML
-    - [ ] Add fallback behavior for "unsupported" file types
+    - [x] Add fallback behavior for "unsupported" file types
 - [ ] Add much more granular configuration of plugin behaviors
   - [ ] Allow users to pass in their own hooks to handle unsupported file
     formats
