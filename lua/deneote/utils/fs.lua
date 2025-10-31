@@ -1,20 +1,6 @@
+local Utils = require('deneote.utils')
+
 local M = {}
-
----Maps values of an array with function
----@generic T
----@generic K
----@param tbl T[]
----@param proc fun(T): K
----@return K[]
-function M.map(tbl, proc)
-  local res = {}
-
-  for i, v in ipairs(tbl) do
-    res[i] = proc(v)
-  end
-
-  return res
-end
 
 ---Remove illegal slug characters from a string
 ---@param s string
@@ -62,30 +48,32 @@ function M.sluggify_title(s)
 end
 
 ---Downcases, de-punctuates, and removes delimiters from string.
-function M.sluggify_tag(s)
+function M.sluggify_keyword(s)
   s = s or ''
   s = M.sluggify_title(s)
   s = s:gsub('%-', '')
   return s
 end
 
----Builds normalized file stem: `id--title-str__tag_str`
+---Builds normalized file stem: `id--title-str__keyword_str`
 ---@param id string
 ---@param title string
----@param tag_str string Comma-separated string of tags
+---@param keyword_str string Comma-separated string of keywords
 ---@return string, string, string[]
-function M.build_file_stem(id, title, tag_str)
+function M.build_file_stem(id, title, keyword_str)
   title = M.sluggify_title(title)
-  local tags = M.map(vim.split(tag_str, ','), M.sluggify_tag)
+  local keywords = Utils.map(vim.split(keyword_str, ','), M.sluggify_keyword)
 
-  tag_str = table.concat(
+  keyword_str = table.concat(
     vim.tbl_filter(function(t)
       return string.find(t, '%S') ~= nil
-    end, tags),
+    end, keywords),
     '_'
   )
 
-  return id .. '--' .. title .. '__' .. tag_str, title, vim.split(tag_str, '_')
+  return id .. '--' .. title .. '__' .. keyword_str,
+    title,
+    vim.split(keyword_str, '_')
 end
 
 ---Resolves every path to the same object to a normal (absolute) path

@@ -11,6 +11,7 @@ local box = layout.Box
 ---@field children? Component[]
 ---@field nui? NuiPopup
 ---@field state? Signal<table>
+---@field _unsubscribe_state? function[]
 ---@field init? fun(self: Component, instance: Component): Component
 local M = {}
 
@@ -94,5 +95,17 @@ end
 
 -- TODO: consider other lifecycle hooks
 function M:on_update() end
+
+function M:destroy()
+  -- self._closed = true
+  if self._unsubscribe_state then
+    self._unsubscribe_state()
+    self._unsubscribe_state = nil
+  end
+
+  if self.nui then
+    self.nui = nil
+  end
+end
 
 return M

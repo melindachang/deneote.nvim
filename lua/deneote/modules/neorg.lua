@@ -1,18 +1,20 @@
 local NeorgDirman = require('neorg').modules.get_module('core.dirman')
 assert(NeorgDirman, 'module core.dirman not found')
 
-local NeorgMetagen = require('neorg').modules.get_module('core.esupports.metagen')
+local NeorgMetagen =
+  require('neorg').modules.get_module('core.esupports.metagen')
 assert(NeorgMetagen, 'module core.esupports.metagen not found')
 
-local Utils = require('deneote.utils')
+local fs = require('deneote.utils.fs')
 
 local M = {}
 
 ---Write to Neorg file with metagen
----@param payload { title: string, tags: string, workspace: string, filetype: string }
+---@param payload { title: string, keywords: string, workspace: string, filetype: string }
 function M.create_file(payload)
-  local ts = Utils.make_timestamp()
-  local stem, title, tags = Utils.build_file_stem(ts, payload.title, payload.tags)
+  local ts = fs.make_timestamp()
+  local stem, title, keywords =
+    fs.build_file_stem(ts, payload.title, payload.keywords)
   local neorg_ts = M.filestem_to_iso(ts)
 
   local ws = M.get_workspace_name(payload.workspace)
@@ -29,7 +31,7 @@ function M.create_file(payload)
       local lines = NeorgMetagen.construct_metadata(buf, {
         title = title,
         categories = function()
-          return string.format('[\n  %s\n]', table.concat(tags, '\n  '))
+          return string.format('[\n  %s\n]', table.concat(keywords, '\n  '))
         end,
         created = neorg_ts,
         updated = neorg_ts,
@@ -52,7 +54,8 @@ function M.filestem_to_iso(id)
   local year, month, day = id:sub(1, 4), id:sub(5, 6), id:sub(7, 8)
   local hour, min, sec = id:sub(10, 11), id:sub(12, 13), id:sub(14, 15)
 
-  local timestamp = string.format('%s-%s-%sT%s:%s:%s', year, month, day, hour, min, sec)
+  local timestamp =
+    string.format('%s-%s-%sT%s:%s:%s', year, month, day, hour, min, sec)
 
   local tz_offset = M.get_timezone_offset()
   local h, m = math.modf(tz_offset / 3600)
@@ -68,7 +71,7 @@ function M.get_workspace_name(path)
   local workspaces = NeorgDirman.get_workspaces() ---@type table<string, PathlibPath>
 
   for name, path_obj in pairs(workspaces) do
-    if Utils.normalize_path(path_obj:absolute('/'):tostring()) == path then
+    if fs.normalize_path(path_obj:absolute('/'):tostring()) == path then
       return name
     end
   end

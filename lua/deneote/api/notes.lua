@@ -1,52 +1,59 @@
+local Renderer = require('deneote.ui.renderer')
+local Prompt = require('deneote.ui.prompt')
+local Menu = require('deneote.ui.menu')
+local WildMenu = require('deneote.ui.wildmenu')
+local Flow = require('deneote.ui.flow')
+
 local Config = require('deneote.config')
-local Form = require('deneote.ui.form')
-local Utils = require('deneote.utils')
+local fs = require('deneote.utils.fs')
 
 local M = {}
 
 ---Create note
 function M.create(_)
-  -- Configure prompts
-  local fields = {} ---@type FormField[]
+  local renderer = Renderer:new()
+  local flow = Flow:new(renderer)
 
-  for _, opt in ipairs({
-    {
-      key = 'workspace',
-      enabled = Config.options.prompts.workspace_dir,
-      default = Config.options.default_workspace_dir,
-      label = 'Enter workspace directory',
-    },
-    {
-      key = 'filetype',
-      enabled = Config.options.prompts.file_type,
-      default = Config.options.default_file_type,
-      label = 'Enter file type',
-    },
-    { key = 'title', enabled = true, label = 'Enter title' },
-    { key = 'tags', enabled = true, label = 'Enter tags' },
-  }) do
-    if opt.enabled then
-      fields[#fields + 1] = { key = opt.key, label = opt.label, default = opt.default or nil }
-    end
+  flow
+    :add_step('title', function()
+      return Prompt:new({ title = 'Title' })
+    end)
+    :add_step('keywords', function()
+      return WildMenu:new({
+        title = 'Keywords',
+        items = { 'one', 'two', 'three' },
+      })
+    end)
+
+  if Config.options.prompts.workspace_dir then
+    flow:add_step('workspace', function()
+      return Prompt:new({ title = 'Workspace directory' })
+    end)
   end
 
-  local form = Form:new(fields)
+  if Config.options.prompts.file_type then
+    flow:add_step('filetype', function()
+      return Menu:new({ title = 'File type', items = { 'norg' } })
+    end)
+  end
 
-  -- Form callback
-  form:mount(function(state)
+  flow.on_complete = function(results)
+    vim.notify('Metadata: ' .. vim.inspect(results))
     local payload = {
-      title = state.title,
-      tags = state.tags,
-      workspace = state.workspace and Utils.normalize_path(state.workspace)
+      title = results.title,
+      keywords = results.keywords,
+      workspace = results.workspace and fs.normalize_path(results.workspace)
         or Config.options.default_workspace_dir,
-      filetype = state.filetype or Config.options.default_file_type,
+      filetype = results.filetype or Config.options.default_file_type,
     }
 
     -- Invoke corresponding module to write to file
     if payload.filetype == 'norg' then
       require('deneote.modules.neorg').create_file(payload)
     end
-  end)
+  end
+
+  flow:start()
 end
 
 return M

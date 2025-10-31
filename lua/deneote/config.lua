@@ -1,6 +1,7 @@
-local Utils = require('deneote.utils')
+local fs = require('deneote.utils.fs')
 
----@alias DeneoteFileType 'norg' | 'org'
+---@alias DeneoteFileType 'norg'
+----| 'org'
 
 ---@class DeneoteCoreConfig
 local M = {}
@@ -40,8 +41,9 @@ local defaults = {
 function M.setup(opts)
   M.options = vim.tbl_deep_extend('force', defaults, opts or {}) ---@type DeneoteConfig
 
-  M.options.root = Utils.normalize_path(M.options.root)
-  M.options.default_workspace_dir = Utils.normalize_path(M.options.default_workspace_dir)
+  M.options.root = fs.normalize_path(M.options.root)
+  M.options.default_workspace_dir =
+    fs.normalize_path(M.options.default_workspace_dir)
 end
 
 return M
