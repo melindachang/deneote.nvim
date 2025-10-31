@@ -9,36 +9,38 @@ local fs = require('deneote.utils.fs')
 
 local M = {}
 
----Create note
-function M.create(_)
+---Create note using flow-controlled prompts
+function M.create(_) -- TODO: support args
   local renderer = Renderer:new()
   local flow = Flow:new(renderer)
 
   flow
     :add_step('title', function()
-      return Prompt:new({ title = 'Title' })
+      return Prompt:new({
+        title = ' Title',
+        box_options = { grow = 0 },
+      })
     end)
     :add_step('keywords', function()
       return WildMenu:new({
-        title = 'Keywords',
+        title = '󰓹 Keywords',
         items = { 'one', 'two', 'three' },
       })
     end)
 
   if Config.options.prompts.workspace_dir then
     flow:add_step('workspace', function()
-      return Prompt:new({ title = 'Workspace directory' })
+      return Prompt:new({ title = ' Workspace directory' })
     end)
   end
 
   if Config.options.prompts.file_type then
     flow:add_step('filetype', function()
-      return Menu:new({ title = 'File type', items = { 'norg' } })
+      return Menu:new({ title = ' File type', items = { 'norg' } })
     end)
   end
 
   flow.on_complete = function(results)
-    vim.notify('Metadata: ' .. vim.inspect(results))
     local payload = {
       title = results.title,
       keywords = results.keywords,
