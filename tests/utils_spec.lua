@@ -15,6 +15,13 @@ describe('utils.map()', function()
   end)
 end)
 
+describe('utils.dedup_array()', function()
+  it('dedups array-like tables', function()
+    eq({ 1, 2, 3, 4 }, utils.dedup_array({ 1, 1, 2, 2, 3, 4 }))
+    eq({ 'hello', 'world' }, utils.dedup_array({ 'hello', 'world', 'world' }))
+  end)
+end)
+
 describe('fs.make_timestamp()', function()
   it('returns string in expected format', function()
     local ts = fs.make_timestamp()
