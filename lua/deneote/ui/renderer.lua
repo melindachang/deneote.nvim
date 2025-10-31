@@ -1,4 +1,3 @@
-local Signal = require('deneote.ui.signal')
 local Utils = require('deneote.utils')
 local layout = require('nui.layout')
 local box = layout.Box
@@ -18,8 +17,8 @@ M.defaults = {
     position = '50%',
     relative = 'editor',
     size = {
-      width = 80,
-      height = 40,
+      width = 30,
+      height = 8,
     },
   },
 }

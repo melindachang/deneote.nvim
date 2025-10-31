@@ -18,7 +18,10 @@ local M = Component:new()
 M.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
   title = '',
   items = {},
-  box_options = { dir = 'col', size = { width = 40, height = 50 } },
+  box_options = {
+    dir = 'col',
+    size = '100%',
+  },
   initial_state = {
     text = '',
   },
@@ -29,12 +32,12 @@ M.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
 function M:init(instance)
   instance.prompt = Prompt:new({
     title = instance.title,
-    box_options = { size = { width = '100%', height = 5 } },
+    box_options = { size = { width = '100%', height = 1 } },
   })
 
   instance.menu = Menu:new({
     items = instance.items,
-    box_options = { grow = 1 },
+    box_options = { size = '100%' },
     menu_options = {
       keymap = {
         submit = '<>', -- prevent default

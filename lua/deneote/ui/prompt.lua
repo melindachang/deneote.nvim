@@ -17,7 +17,7 @@ M.defaults = vim.tbl_deep_extend('force', {}, Component.defaults, {
     zindex = 100,
     position = '50%',
     relative = 'editor',
-    size = { width = 30, height = 5 },
+    size = { width = 30, height = 1 },
     border = {
       padding = { 0, 1, 0, 1 },
       style = 'rounded',
