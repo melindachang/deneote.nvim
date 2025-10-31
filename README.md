@@ -4,25 +4,6 @@
 enforce a sensible name scheme on your notes. Under construction, not meant for
 public consumption etc. Building for Neorg support first.
 
-## Roadmap
-
-- [x] Redesign component system and clean up API
-- [x] Add suggestions for persistent keywords
-- [ ] Add (bulk) renaming of existing files
-- [ ] Add search within files, equiv. `denote-dired`
-- [ ] Add support for other plain text standards
-    - [ ] org
-    - [ ] Markdown + YAML
-    - [ ] Markdown + TOML
-    - [ ] Add fallback behavior for "unsupported" filetypes
-- [ ] Add much more granular configuration of plugin behaviors
-  - [ ] Allow users to pass in their own hooks to handle unsupported file
-    formats
-  - [ ] Allow customization of file name template (e.g., removing `T` in the
-    ID)
-  - [ ] Allow custom definitions for prompts via component system
-- [ ] Add backlinking features
-
 ## Overview
 
 The Deneote system organizes itself about a central file naming convention.
@@ -57,3 +38,23 @@ the following workflows:
   any file type, so it can be easily configured to fit your preferred standard,
   or switch between them based on user input. (Adding fully-featured support is
   largely a matter of generating format-specific metadata.)
+
+## Roadmap
+
+- [x] Redesign component system and clean up API
+- [x] Add suggestions for persistent keywords
+- [ ] Add (bulk) renaming of existing files
+- [ ] Add search within files, equiv. `denote-dired`
+- [ ] Add support for other plain text standards
+    - [ ] org
+    - [ ] Markdown + YAML
+    - [ ] Markdown + TOML
+    - [ ] Add fallback behavior for "unsupported" filetypes
+- [ ] Add much more granular configuration of plugin behaviors
+  - [ ] Allow users to pass in their own hooks to handle unsupported file
+    formats
+  - [ ] Allow customization of file name template (e.g., removing `T` in the
+    ID)
+  - [ ] Allow custom definitions for prompts via component system
+- [ ] Add backlinking features
+

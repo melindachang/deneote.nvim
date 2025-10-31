@@ -26,7 +26,7 @@ local defaults = {
   default_file_type = 'norg',
 
   -- Provide list of strings to suggest in the keyword prompt
-  known_keywords = {},
+  known_keywords = { 'idea', 'journal', 'research' },
 
   -- Set to `true` to provide values on a per-file basis
   prompts = {
