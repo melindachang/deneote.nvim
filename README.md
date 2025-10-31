@@ -6,7 +6,7 @@ public consumption etc. Building for Neorg support first.
 
 ## Roadmap
 
-- [ ] Redesign component system and clean up API
+- [x] Redesign component system and clean up API
 - [ ] Add suggestions for persistent keywords
 - [ ] Add (bulk) renaming of existing files
 - [ ] Add search within files, equiv. `denote-dired`
