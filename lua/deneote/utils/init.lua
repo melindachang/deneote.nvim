@@ -1,6 +1,6 @@
 local M = {}
 
----Maps values of an array with function
+---Maps values of table with function
 ---@generic T
 ---@generic K
 ---@param tbl T[]
@@ -29,6 +29,24 @@ function M.filter_completions(tbl, value)
   return vim.tbl_filter(function(item)
     return item:lower():find(value:lower(), 1, true)
   end, tbl)
+end
+
+---Removes duplicates from array-like table
+---@generic T: table
+---@param tbl T
+---@return T
+function M.dedup_array(tbl)
+  local res = {}
+  local seen = {}
+
+  for _, value in ipairs(tbl) do
+    if not seen[value] then
+      table.insert(res, value)
+      seen[value] = true
+    end
+  end
+
+  return res
 end
 
 return M

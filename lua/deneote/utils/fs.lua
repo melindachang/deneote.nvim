@@ -63,13 +63,11 @@ end
 function M.build_file_stem(id, title, keyword_str)
   title = M.sluggify_title(title)
   local keywords = Utils.map(vim.split(keyword_str, ','), M.sluggify_keyword)
+  keywords = vim.tbl_filter(function(t)
+    return string.find(t, '%S') ~= nil
+  end, keywords)
 
-  keyword_str = table.concat(
-    vim.tbl_filter(function(t)
-      return string.find(t, '%S') ~= nil
-    end, keywords),
-    '_'
-  )
+  keyword_str = table.concat(Utils.dedup_array(keywords), '_')
 
   return id .. '--' .. title .. '__' .. keyword_str,
     title,
