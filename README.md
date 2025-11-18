@@ -9,7 +9,9 @@ public consumption etc. Building for Neorg support first.
 The Deneote system organizes itself about a central file name convention.
 Here's an example of a typical file outputted by Deneote:
 
-``` 20251028T123846--my-first-note__foo_bar.norg ```
+```
+20251028T123846--my-first-note__foo_bar.norg
+```
 
 This file stem consists of 3 parts:
 1. The string `20251028T123846` is a timestamp that serves as the note's ID.
@@ -44,6 +46,7 @@ the following workflows:
 
 - [x] Redesign component system and clean up API
 - [x] Add suggestions for persistent keywords
+- [ ] Expose mapping and remapping keys within components
 - [ ] Add (bulk) renaming of existing files from metadata
 - [ ] Add search within files, equiv. `denote-dired`
 - [ ] Add support for other file types
